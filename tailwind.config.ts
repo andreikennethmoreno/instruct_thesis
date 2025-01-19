@@ -1,4 +1,7 @@
 import type { Config } from "tailwindcss";
+import daisyui from "daisyui"
+import typography from '@tailwindcss/typography';
+
 
 export default {
   content: [
@@ -8,11 +11,14 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-      },
+
     },
   },
-  plugins: [],
+  plugins: [
+    daisyui,
+    typography
+  ],
+  daisyui: {
+    themes: ["winter"],
+  },
 } satisfies Config;
