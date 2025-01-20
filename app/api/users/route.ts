@@ -1,13 +1,28 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { userSchema, UserData } from '@/lib/schemas';  // Import user schema
+import bcrypt from 'bcryptjs';
+
 
 const prisma = new PrismaClient();
 
-// GET - Fetch all users
-export async function GET() {
-  const users = await prisma.user.findMany();  // Fetch all users from the database
-  return NextResponse.json(users);
+// GET - Fetch all users with optional search query
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const searchQuery = url.searchParams.get('q')?.toLowerCase(); // Retrieve the 'q' query parameter
+
+  const users = await prisma.user.findMany(); // Fetch all users from the database
+
+  // Filter users if a search query is provided
+  const filteredUsers = searchQuery
+    ? users.filter(
+        (user) =>
+          user.email.toLowerCase().includes(searchQuery) ||
+          user.username.toLowerCase().includes(searchQuery)
+      )
+    : users;
+
+  return NextResponse.json(filteredUsers);
 }
 
 // POST - Create a new user
@@ -16,11 +31,17 @@ export async function POST(request: Request) {
     const body: UserData = await request.json();  // Parse the incoming request body as UserData
     const validatedData = userSchema.parse(body);  // Validate the data using Zod schema
 
-    const newUser = await prisma.user.create({  // Create a new user in the database
+    // Hash the password using bcrypt
+    const hashedPassword = await bcrypt.hash(validatedData.password, 10); // 10 is the salt rounds
+    validatedData.password = hashedPassword;
+
+    // Create a new user in the database
+    const newUser = await prisma.user.create({
       data: validatedData,
     });
 
-    return NextResponse.json(newUser, { status: 201 });  // Return the newly created user
+    // Redirect to the login page after successful user creation
+    return NextResponse.redirect('http://localhost:3000/login', { status: 303 });
   } catch (error: any) {
     if (error.name === 'ZodError') {
       return NextResponse.json({ error: error.errors }, { status: 400 });  // Handle validation errors
