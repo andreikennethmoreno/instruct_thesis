@@ -21,7 +21,12 @@ export const authOptions = {
 
         // Check if user exists and compare hashed passwords
         if (user && credentials?.password && await bcrypt.compare(credentials.password, user.password)) {
-          return { id: user.user_id.toString(), email: user.email, role: user.role };
+          return {
+            id: user.user_id.toString(), // Return the user_id as id
+            email: user.email,
+            role: user.role,
+            profile_picture_url: user.profile_picture_url,
+          };
         }
 
         return null; // Return null if authentication fails
@@ -37,16 +42,18 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
-        token.id = user.id;
+        token.id = user.id; // Ensure the user id is assigned to the token (user.user_id)
         token.email = user.email;
         token.role = user.role; // Store the user's role in the JWT
+        token.profile_picture_url = user.profile_picture_url; // Store profile picture URL in the token
       }
       return token;
     },
     async session({ session, token }: { session: any; token: any }) {
       if (token) {
-        session.user.id = token.id;
+        session.user.id = token.id; // This will now have the user_id from token
         session.user.role = token.role; // Attach the role to the session
+        session.user.profile_picture_url = token.profile_picture_url;
       }
       return session;
     },
