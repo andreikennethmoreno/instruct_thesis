@@ -30,6 +30,13 @@ const Sidebar = () => {
                 <div className='font-bold text-md'>Courses</div>
             </Link>
           </li>
+          <li>
+            <Link href={`/dashboard/profile/${session.user?.id}`}>
+                <div className='font-bold text-md'>Profile</div>
+            </Link>
+          </li>
+
+        
 
           {/* Conditionally render Sidebar Item 2 based on role */}
           {session.user?.role === 'Admin' && (

@@ -40,79 +40,50 @@ const UserList: React.FC = () => {
     setIsLoading(true);
     try {
       let response;
-
-      console.log("Submitting user with ID:", formData.user_id);  // Log the user ID here
-
-
-      const password = formData.password as string;
-
-    if (password) {
-      // Only hash the password if it's not already hashed
-      if (!password.startsWith('$2a$')) {
-        const hashedPassword = await hashPassword(password);  // Hash the password
-        formData.password = hashedPassword;  // Replace plaintext password with hashed one
-      }
-      // If the password is already hashed, leave it as it is
-    } else {
-      // If no password is provided (for existing users), do not modify the password field
-      // Retain the old password in formData when updating an existing user
-      if (formData.user_id) {
+  
+      console.log("Submitting user with ID:", formData.user_id); // Debugging info
+  
+      // Handle password logic
+      if (formData.password && !formData.password.startsWith("$2a$")) {
+        // Hash the password only if it's plaintext
+        const hashedPassword = await hashPassword(formData.password);
+        formData.password = hashedPassword;
+      } else if (!formData.password && formData.user_id) {
+        // Fetch and retain the existing hashed password if no password is provided
         const existingUserResponse = await fetch(`/api/users/${formData.user_id}`);
+        if (!existingUserResponse.ok) {
+          throw new Error("Failed to fetch existing user data.");
+        }
         const existingUserData = await existingUserResponse.json();
-        formData.password = existingUserData.password; // Use the old password if it's not provided
+        formData.password = existingUserData.password; // Use the existing hashed password
       }
-    }
-
-      // Check if it's an existing user (i.e., user_id is present) or a new user (i.e., no user_id)
-      if (formData.user_id) {
-        // Update existing user (PUT request)
-        response = await fetch(`/api/users/${formData.user_id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        });
-      } else {
-        // Create new user (POST request)
-        response = await fetch('/api/users', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        });
-      }
-
-      // Handle response
+  
+      // Send PUT request to update user profile
+      response = await fetch(`/api/users/${formData.user_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+  
       if (response && response.ok) {
         const data = await response.json();
-        if (formData.user_id) {
-          // Update user in state
-          setUsers((prevUsers) =>
-            prevUsers.map((user) =>
-              user.user_id === formData.user_id ? data : user
-            )
-          );
-          alert('User updated successfully');
-        } else {
-          // Add new user to state
-          setUsers((prevUsers) => [...prevUsers, data]);
-          alert('User created successfully');
-        }
+        setSelectedUser(data); // Update local state
+        alert("Profile updated successfully");
+        closeModal();
       } else if (response) {
         const errorMessage = await response.text();
-        console.error(`Error: ${errorMessage}`);
-        alert(`Failed to save user: ${response.statusText}`);
+        alert(`Failed to update profile: ${errorMessage}`);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error: Could not connect to the server');
+      console.error("Error:", error);
+      alert("Error: Could not connect to the server");
     } finally {
       setIsLoading(false);
-      closeModal();
     }
   };
+  
 
   useEffect(() => {
     const fetchUsers = async () => {

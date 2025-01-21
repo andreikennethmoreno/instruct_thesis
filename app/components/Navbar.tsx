@@ -1,12 +1,13 @@
-'use client'
-import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+'use client';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import LogoutButton from './Logout';
+import Logout from './Logout';
 
 const Navbar = () => {
   const { data: session, status } = useSession(); // Fetch session from NextAuth
-
-  console.log("session" + session)
+  
 
   // Show loading state
   if (status === 'loading') {
@@ -26,13 +27,8 @@ const Navbar = () => {
       </div>
       <div className="flex-none">
         {session ? (
-          <Link href={`/dashboard/profile/${session.user?.id}`}>
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full">
-              <img alt="User Avatar" src={session.user?.profile_picture_url || '' }/>
-              </div>
-            </div>
-          </Link>
+          <Logout />
+         
         ) : (
           <Link href="/login">
             <button className="btn btn-ghost">Login</button>
