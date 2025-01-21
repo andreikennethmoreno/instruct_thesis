@@ -78,6 +78,9 @@ const ProfileDetailsPage: React.FC<ProfileDetailsPageProps> = async ({ params })
               <div className="w-52 rounded-full">
                 <img src={user.profile_picture_url || ''} alt="User Avatar" />
               </div>
+              
+              <button className="btn btn-sm rounded-full btn-primary ">Edit</button>
+
             </div>
 
             <h3 className="pt-5 font-bold text-3xl">{user.first_name} {user.last_name}</h3>

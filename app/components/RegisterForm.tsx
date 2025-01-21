@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation after successful form submission
 
 interface FormData {
-    user_id?: number;
+  user_id: number;
   username: string;
   password: string;
   first_name: string;
@@ -12,6 +12,7 @@ interface FormData {
   contact_number: string;
   role: string;
   email: string;
+  profile_picture_url: string;
 }
 
 interface RegisterFormProps {
@@ -22,6 +23,7 @@ interface RegisterFormProps {
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState<FormData>({
+    user_id: initialFormData?.user_id || 0,
     username: initialFormData?.username || '',
     password: initialFormData?.password || '',
     first_name: initialFormData?.first_name || '',
@@ -29,13 +31,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
     contact_number: initialFormData?.contact_number || '',
     role: initialFormData?.role || 'Educator', // Default role is Educator
     email: initialFormData?.email || '',
+    profile_picture_url: initialFormData?.profile_picture_url || 'https://i.pinimg.com/736x/56/61/34/5661345ba5f329555626d58f33dd642c.jpg',
   });
   
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData({
-        ...formData,
+      setFormData((prevFormData) => ({
+        ...prevFormData,
         [e.target.name]: e.target.value,
-      });
+      }));
   
       // If the username changes, update the email as well
       if (e.target.name === 'username') {
@@ -45,11 +48,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
         }));
       }
     };
+
+    const handleFormSubmit = (e: React.FormEvent) => {
+      e.preventDefault(); 
+      onSubmit(formData); 
+    };
   
   
     return (
-      <form className="card-body" onSubmit={onSubmit}>
-        {/* Username and Password Side by Side */}
+      <form className="card-body" onSubmit={handleFormSubmit}>
+
+<div className="form-control">
+            <label className="label">
+              <span className="label-text">Profile Picture</span>
+            </label>
+            <input
+              type="text"
+              name="profile_picture_url"
+              placeholder="profile_picture_url"
+              className="input input-bordered"
+              required
+              value={formData.profile_picture_url}
+              onChange={handleChange}
+            />
+           
+          </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="form-control">
             <label className="label">
@@ -151,7 +174,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
   
         <div className="form-control mt-6">
           <button className="btn btn-primary" disabled={isLoading}>
-            {isLoading ? 'Registering...' : 'Register'}
+            {isLoading ? 'Saving' : 'Save'}
           </button>
         </div>
       </form>

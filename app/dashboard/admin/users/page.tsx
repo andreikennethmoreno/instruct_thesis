@@ -1,14 +1,15 @@
-// UserList.tsx
 'use client';
 
 import Modal from "@/app/components/Modal";
 import RegisterForm from "@/app/components/RegisterForm";
+import { hashPassword } from "@/lib/bcrypt";
 import React, { useState, useEffect } from "react";
 
 interface User {
   user_id: number;
   email: string;
   username: string;
+  password?: string;
   first_name: string;
   last_name: string;
   role: string;
@@ -23,64 +24,95 @@ const UserList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const openModal = (user: User) => {
-    setSelectedUser(user);  // Set the selected user for editing
+  // Open modal for editing or adding a user
+  const openModal = (user: User | null) => {
+    setSelectedUser(user);  // Set the selected user for editing, or null for creating a new user
     setIsModalOpen(true);
   };
 
+  // Close modal
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedUser(null);  // Clear the selected user when closing modal
+    setSelectedUser(null);  // Clear selected user when closing modal
   };
 
   const handleSubmit = async (formData: User) => {
     setIsLoading(true);
     try {
-    
-  
+      let response;
+
+      console.log("Submitting user with ID:", formData.user_id);  // Log the user ID here
+
+
+      const password = formData.password as string;
+
+    if (password) {
+      // Only hash the password if it's not already hashed
+      if (!password.startsWith('$2a$')) {
+        const hashedPassword = await hashPassword(password);  // Hash the password
+        formData.password = hashedPassword;  // Replace plaintext password with hashed one
+      }
+      // If the password is already hashed, leave it as it is
+    } else {
+      // If no password is provided (for existing users), do not modify the password field
+      // Retain the old password in formData when updating an existing user
       if (formData.user_id) {
-        // Update existing user
-        const response = await fetch(`/api/users/${formData.user_id}`, {
+        const existingUserResponse = await fetch(`/api/users/${formData.user_id}`);
+        const existingUserData = await existingUserResponse.json();
+        formData.password = existingUserData.password; // Use the old password if it's not provided
+      }
+    }
+
+      // Check if it's an existing user (i.e., user_id is present) or a new user (i.e., no user_id)
+      if (formData.user_id) {
+        // Update existing user (PUT request)
+        response = await fetch(`/api/users/${formData.user_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
         });
-  
-        if (response.ok) {
-          setUsers((prevUsers) =>
-            prevUsers.map((user) =>
-              user.user_id === formData.user_id ? formData : user
-            )
-          );
-          alert('User updated successfully');
-        }
       } else {
-        // Create new user
-        const response = await fetch(`/api/users`, {
+        // Create new user (POST request)
+        response = await fetch('/api/users', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
         });
-  
-        if (response.ok) {
-          const newUser = await response.json();
-          setUsers((prevUsers) => [...prevUsers, newUser]);
+      }
+
+      // Handle response
+      if (response && response.ok) {
+        const data = await response.json();
+        if (formData.user_id) {
+          // Update user in state
+          setUsers((prevUsers) =>
+            prevUsers.map((user) =>
+              user.user_id === formData.user_id ? data : user
+            )
+          );
+          alert('User updated successfully');
+        } else {
+          // Add new user to state
+          setUsers((prevUsers) => [...prevUsers, data]);
           alert('User created successfully');
         }
+      } else if (response) {
+        const errorMessage = await response.text();
+        console.error(`Error: ${errorMessage}`);
+        alert(`Failed to save user: ${response.statusText}`);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error:', error);
       alert('Error: Could not connect to the server');
     } finally {
       setIsLoading(false);
       closeModal();
     }
   };
-  
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -139,7 +171,17 @@ const UserList: React.FC = () => {
   return (
     <div className="overflow-x-auto">
       <div className="flex items-center justify-between m-5">
+        <div className="flex items-center ">
         <h1 className="text-5xl">List of Users</h1>
+        <button
+          className="btn btn-sm btn-primary rounded-full ml-4"
+          onClick={() => openModal(null)} // Pass `null` to indicate new user
+        >
+          Add
+        </button>
+        </div>
+        
+
         <div>
           <input
             type="text"
@@ -152,14 +194,21 @@ const UserList: React.FC = () => {
       </div>
 
       <Modal title="Edit User" isOpen={isModalOpen} onClose={closeModal}>
-      {selectedUser && (
         <RegisterForm
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          initialFormData={selectedUser} // This ensures the selected user's data is passed to the form
+          initialFormData={selectedUser || {
+            user_id: 0,
+            email: "",
+            username: "",
+            password: "",
+            first_name: "",
+            last_name: "",
+            role: "",
+            contact_number: ""
+          }} // Pass empty data for new user
         />
-      )}
-    </Modal>
+      </Modal>
 
       <table className="table">
         <thead>

@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react'
 const Navbar = () => {
   const { data: session, status } = useSession(); // Fetch session from NextAuth
 
+  console.log("session" + session)
+
   // Show loading state
   if (status === 'loading') {
     return (
@@ -27,7 +29,7 @@ const Navbar = () => {
           <Link href={`/dashboard/profile/${session.user?.id}`}>
             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">
-              <img alt="User Avatar" src={session.user?.profile_picture_url || 'https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp'} />
+              <img alt="User Avatar" src={session.user?.profile_picture_url || '' }/>
               </div>
             </div>
           </Link>
