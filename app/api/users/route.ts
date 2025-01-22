@@ -25,6 +25,7 @@ export async function GET(req: Request) {
   return NextResponse.json(filteredUsers);
 }
 
+
 // POST - Create a new user
 export async function POST(request: Request) {
   try {
@@ -35,16 +36,21 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(validatedData.password, 10); // 10 is the salt rounds
     validatedData.password = hashedPassword;
 
+    // Remove user_id from validatedData
+    const { user_id, ...userData } = validatedData;
+
     // Create a new user in the database
     const newUser = await prisma.user.create({
-      data: validatedData,
+      data: userData,
     });
 
     // Redirect to the login page after successful user creation
     return NextResponse.redirect('http://localhost:3000/login', { status: 303 });
   } catch (error: any) {
     if (error.name === 'ZodError') {
-      return NextResponse.json({ error: error.errors }, { status: 400 });  // Handle validation errors
+      // Convert Zod validation errors to a readable string
+      const errorMessages = error.errors.map((err: any) => err.message).join(', ');
+      return NextResponse.json({ error: errorMessages }, { status: 400 });  // Return error messages as a string
     }
     return NextResponse.json({ error: error.message }, { status: 500 });  // Handle other server errors
   }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation after successful form submission
+import useRandomProfilePicture from '@/lib/randomPicture';
 
 interface FormData {
   user_id: number;
@@ -21,7 +22,13 @@ interface RegisterFormProps {
   isLoading: boolean; // Prop to control loading state
 }
 
+
+
+
 const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, isLoading }) => {
+  
+  const profilePictureUrl = useRandomProfilePicture();
+  
   const [formData, setFormData] = useState<FormData>({
     user_id: initialFormData?.user_id || 0,
     username: initialFormData?.username || '',
@@ -31,7 +38,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
     contact_number: initialFormData?.contact_number || '',
     role: initialFormData?.role || 'Educator', // Default role is Educator
     email: initialFormData?.email || '',
-    profile_picture_url: initialFormData?.profile_picture_url || 'https://i.pinimg.com/736x/56/61/34/5661345ba5f329555626d58f33dd642c.jpg',
+    profile_picture_url: initialFormData?.profile_picture_url || profilePictureUrl,
   });
   
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,9 +65,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
     return (
       <form className="card-body" onSubmit={handleFormSubmit}>
 
-<div className="form-control">
+       
+
+
+          <div className="grid grid-cols-2 gap-4">
+          <div className="form-control">
             <label className="label">
-              <span className="label-text">Profile Picture</span>
+              <span className="label-text">Profile Picture URL</span>
             </label>
             <input
               type="text"
@@ -73,6 +84,25 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
             />
            
           </div>
+  
+          <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Role</span>
+                </label>
+                <select
+                  className="select select-bordered"
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                >
+                  <option value="Educator">Educator</option>
+                  <option value="Student">Student</option>
+                </select>
+              </div>
+
+        </div>
+
+
+
         <div className="grid grid-cols-2 gap-4">
           <div className="form-control">
             <label className="label">
@@ -168,6 +198,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
             />
           </div>
         </div>
+
+
+        
+
   
         {/* Hidden Input for Role with Default Value */}
         <input type="hidden" name="role" value={formData.role} />

@@ -16,6 +16,12 @@ model Product {
   updatedAt   DateTime @updatedAt
 }
 
+enum Role {
+  Admin
+  Educator
+  Student
+}
+
 model User {
   user_id             Int       @id @default(autoincrement())
   username            String    @unique
@@ -30,6 +36,8 @@ model User {
   updated_at          DateTime  @default(now()) @updatedAt
   receivedMessages    Message[] @relation("ReceivedMessages")
   sentMessages        Message[] @relation("SentMessages")
+  coursesEnrolled   Course[]     @relation("UserCourses")
+  coursesOwned      Course[]     @relation("CourseOwners")
 }
 
 model Message {
@@ -43,7 +51,17 @@ model Message {
   sender       User      @relation("SentMessages", fields: [sender_id], references: [user_id])
 }
 
-enum Role {
-  Admin
-  Educator
+
+model Course {
+  course_id         Int          @id @default(autoincrement())
+  course_code       String       @unique
+  title             String
+  description       String
+  prerequisites     String?
+  learning_outcomes String?
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @default(now()) @updatedAt
+  users             User[]       @relation("UserCourses") // Enrolled users
+  owners            User[]       @relation("CourseOwners") // Course owners
 }
+

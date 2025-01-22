@@ -13,7 +13,7 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="drawer sticky top-0 z-60 drawer-open">
+    <div className="drawer drawer-open">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-center justify-center">
         {/* Page content here */}

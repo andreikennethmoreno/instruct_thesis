@@ -38,26 +38,20 @@ const Login: React.FC<LoginProps> = ({ defaultRole = "Educator" }) => {
   return (
     <div className="hero bg-base-200 min-h-full">
       <div className="hero-content flex-col">
- 
 
-       
         {/* Conditionally render the role-based label */}
         {role === "Admin" && (
           <div className="text-center mb-4 mt-10">
-          <h2 className="text-5xl font-semibold">Login as Admin</h2>
+            <h2 className="text-5xl font-semibold">Welcome back, Admin</h2>
           </div>
         )}
         {role !== "Admin" && (
-            <div className="text-center mb-4 mt-10">
+          <div className="text-center mb-4 mt-10">
             <h2 className="text-5xl font-semibold">Login</h2>
           </div>
         )}
 
-
         <div className="card bg-base-100 w-full shrink-0 shadow-2xl">
-
-        
-
           <form className="card-body" onSubmit={handleLogin}>
             <div className="form-control">
               <label className="label">
@@ -85,12 +79,32 @@ const Login: React.FC<LoginProps> = ({ defaultRole = "Educator" }) => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            {/* Hidden Input for Role with Default Value */}
-            <input
-              type="hidden"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            />
+
+            {/* Conditionally render the dropdown or hidden input based on role */}
+            {role !== "Admin" && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Role</span>
+                </label>
+                <select
+                  className="select select-bordered"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                >
+                  <option value="Educator">Educator</option>
+                  <option value="Student">Student</option>
+                </select>
+              </div>
+            )}
+
+            {role === "Admin" && (
+              <input
+                type="hidden"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              />
+            )}
+
             <div className="form-control mt-6">
               <button className="btn btn-primary">Login</button>
             </div>

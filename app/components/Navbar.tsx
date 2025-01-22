@@ -31,7 +31,7 @@ const Navbar = () => {
          
         ) : (
           <>
-            <Link href="/Register">
+            <Link href="/register">
             <button className="btn btn-ghost">Sign up</button>
             </Link>
 

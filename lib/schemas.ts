@@ -9,7 +9,7 @@ export const productSchema = z.object({
 
 
 // Define the Role enum schema
-const Role = z.enum(['Admin', 'Educator']); // Zod enum based on your Prisma Role enum
+const Role = z.enum(['Admin', 'Educator', 'Student']); // Zod enum based on your Prisma Role enum
 
 export const userSchema = z.object({
   user_id: z.number().optional(), // This is optional for creating new users, but required for updates
@@ -34,8 +34,31 @@ export const messageSchema = z.object({
   read_at: z.date().nullable().optional(), // Can be null or omitted
 });
 
+export const courseSchema = z.object({
+  course_id: z.number().optional(), // Optional because it's auto-incremented by Prisma
+  course_code: z
+    .string()
+    .min(1, "Course code is required")
+    .max(20, "Course code cannot be longer than 20 characters"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(100, "Title cannot exceed 100 characters"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(500, "Description cannot exceed 500 characters"),
+  prerequisites: z.string().nullable().optional(), // Can be null or omitted
+  learning_outcomes: z.string().nullable().optional(), // Can be null or omitted
+  created_at: z.date().optional(), // Prisma sets this automatically
+  updated_at: z.date().optional(), // Prisma sets this automatically
+  owner_ids: z
+    .array(z.number())
+    .nonempty("At least one owner is required") // Ensure there's at least one owner
+    .min(1, "At least one owner is required"), // Ensures that at least one owner is provided
+});
+
+export type CourseData = z.infer<typeof courseSchema>;
 export type MessageData = z.infer<typeof messageSchema>;
-
-
 export type UserData = z.infer<typeof userSchema>;
 export type ProductData = z.infer<typeof productSchema>;

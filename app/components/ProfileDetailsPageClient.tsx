@@ -93,7 +93,9 @@ const ProfileDetailsPageClient: React.FC<ProfileDetailsPageClientProps> = ({ use
             {selectedUser.first_name} {selectedUser.last_name}
           </h3>
           <h4 className="text-xl">@{selectedUser.username}</h4>
-          <div className="badge badge-primary">{selectedUser.role}</div>
+          <div className={`badge ${selectedUser.role === 'Admin' ? 'badge-warning' : selectedUser.role === 'Educator' ? 'badge-primary' : 'badge-secondary'}`}>
+          {selectedUser.role}
+        </div>
           <ul className="pt-5">
             <li className="text-md">
               <span className="font-bold">Contact:</span> {selectedUser.contact_number}

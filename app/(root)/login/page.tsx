@@ -3,7 +3,7 @@ import React from 'react'
 
 const LoginEducator = () => {
   return (
-    <Login defaultRole="Eductor"/>
+    <Login defaultRole="Educator"/>
   )
 }
 
