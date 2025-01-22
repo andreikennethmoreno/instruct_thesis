@@ -30,9 +30,16 @@ const Navbar = () => {
           <Logout />
          
         ) : (
+          <>
+            <Link href="/Register">
+            <button className="btn btn-ghost">Sign up</button>
+            </Link>
+
           <Link href="/login">
-            <button className="btn btn-ghost">Login</button>
+          <button className="btn btn-ghost">Login</button>
           </Link>
+          </>
+          
         )}
       </div>
     </div>

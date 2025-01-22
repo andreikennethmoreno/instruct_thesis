@@ -25,5 +25,17 @@ export const userSchema = z.object({
   updated_at: z.date().optional(), // Prisma will automatically handle this
 });
 
+export const messageSchema = z.object({
+  message_id: z.number().optional(), // Optional because it's auto-incremented by Prisma
+  sender_id: z.number(),
+  receiver_id: z.number(),
+  message_text: z.string().min(1, "Message text cannot be empty"),
+  sent_at: z.date().optional(), // Prisma sets this automatically, but it's optional for validation
+  read_at: z.date().nullable().optional(), // Can be null or omitted
+});
+
+export type MessageData = z.infer<typeof messageSchema>;
+
+
 export type UserData = z.infer<typeof userSchema>;
 export type ProductData = z.infer<typeof productSchema>;

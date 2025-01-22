@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { hashPassword } from "@/lib/bcrypt";
-import LogoutButton from "@/app/components/Logout";
 import RegisterForm from "@/app/components/RegisterForm";
 import Modal from "@/app/components/Modal";
 
@@ -10,13 +9,13 @@ interface User {
   user_id: number;
   email: string;
   username: string;
-  password?: string;
-  first_name: string | null;
-  last_name: string | null;
+  password: string;
+  first_name: string;
+  last_name: string;
   role: string;
-  contact_number: string | null;
-  profile_picture_url: string | null;
-  joined_date: string;
+  contact_number: string;
+  profile_picture_url: string;
+  joined_date?: string;
 }
 
 interface ProfileDetailsPageClientProps {

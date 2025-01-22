@@ -25,14 +25,20 @@ const Sidebar = () => {
         <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
         <ul className="border menu bg-base-100 text-base-content min-h-full w-40 p-4">
           {/* Sidebar content with Link components for routing */}
+         
+          <li>
+            <Link href={`/dashboard/profile/${session.user?.id}`}>
+                <div className='font-bold text-md'>Profile</div>
+            </Link>
+          </li>
           <li>
             <Link href="/dashboard/courses">
                 <div className='font-bold text-md'>Courses</div>
             </Link>
           </li>
           <li>
-            <Link href={`/dashboard/profile/${session.user?.id}`}>
-                <div className='font-bold text-md'>Profile</div>
+            <Link href="/dashboard/messages">
+                <div className='font-bold text-md'>Messages</div>
             </Link>
           </li>
 
