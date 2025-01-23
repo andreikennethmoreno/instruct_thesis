@@ -38,6 +38,7 @@ model User {
   sentMessages        Message[] @relation("SentMessages")
   coursesEnrolled   Course[]     @relation("UserCourses")
   coursesOwned      Course[]     @relation("CourseOwners")
+  topicsCreated       Topic[]   @relation("UserTopics")
 }
 
 model Message {
@@ -64,5 +65,17 @@ model Course {
   owners            User[]   @relation("CourseOwners")
   users             User[]   @relation("UserCourses")
   course_picture_url String? // Add this line to your model
+  topics            Topic[]  // Relation to topics
+
 }
 
+
+model Topic {
+  topic_id         Int      @id @default(autoincrement())
+  title            String
+  content          String?
+  course_id        Int
+  course           Course   @relation(fields: [course_id], references: [course_id])
+  creator_id       Int?     // Optional: user who created the topic (can be an educator)
+  creator          User?    @relation("UserTopics", fields: [creator_id], references: [user_id]) // Relation to User (creator)
+}

@@ -58,6 +58,24 @@ export const courseSchema = z.object({
     .min(1, "At least one owner is required"), // Ensures that at least one owner is provided
 });
 
+
+export const topicSchema = z.object({
+  topic_id: z.number().optional(), // Optional because it's auto-incremented by Prisma
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(100, "Title cannot exceed 100 characters"),
+  content: z
+    .string()
+    .nullable()
+    .optional(), // Can be null or omitted
+  course_id: z.number().min(1, "Course ID is required"), // Ensures the course ID is provided
+  creator_id: z.number().nullable().optional(), // Optional: can be null or omitted if no creator
+  created_at: z.date().optional(), // Prisma sets this automatically
+  updated_at: z.date().optional(), // Prisma sets this automatically
+});
+
+export type TopicData = z.infer<typeof topicSchema>;
 export type CourseData = z.infer<typeof courseSchema>;
 export type MessageData = z.infer<typeof messageSchema>;
 export type UserData = z.infer<typeof userSchema>;

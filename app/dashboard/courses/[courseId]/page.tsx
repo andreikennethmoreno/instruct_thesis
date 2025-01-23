@@ -31,16 +31,20 @@ const CourseDetailsPage = ({ params }: { params: Params }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [type, setType] = useState<string | null>(null); // New state for type
   const coursePictureUrl = useRandomProfilePicture(1500, 140);
 
-  const openModal = (course: Course | null) => {
+  const openModal = (course: Course | null, type: string | null) => {
     setSelectedCourse(course); // Set the selected course for editing
     setIsModalOpen(true);
+    setType(type);
+    console.log('Type:', type);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCourse(null); // Reset selected course when closing
+    setType(null);
   };
 
   const onSubmit = async (formData: Course) => {
@@ -178,18 +182,19 @@ const CourseDetailsPage = ({ params }: { params: Params }) => {
           <div className="absolute bottom-5 font-bold right-5 z-40 text-black p-2 rounded-md">
             <div className="dropdown dropdown-left dropdown-hover">
               <div tabIndex={0} role="button" className="btn btn-primary m-1">
-                Add
+                Add Users
               </div>
               <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
                 <li className="p-1">
-                  <button onClick={() => openModal(course)} className="btn-sm btn btn-secondary">
+                    <button onClick={() => openModal(course, 'Students')} className="btn-sm btn btn-secondary">
                     Students
                   </button>
+
                 </li>
                 <li className="p-1">
-                <button onClick={() => openModal(course)} className="btn-sm btn btn-error">
-                  Instructors
-                </button>                
+                <button onClick={() => openModal(course, 'Educators')} className="btn-sm btn btn-error">
+                Educators
+              </button>             
               </li>
               </ul>
             </div>
@@ -233,10 +238,14 @@ const CourseDetailsPage = ({ params }: { params: Params }) => {
             learning_outcomes: '',
             course_picture_url: '',
           }}
+          type={type}
         />
       </Modal>
 
-      <CreateCourseContent />
+      <CreateCourseContent 
+      courseId={course.course_id}
+      userId={course.owners[0]} 
+      />
 
       <CourseDetails
         name={course.title}

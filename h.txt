@@ -1,0 +1,8 @@
+
+DATABASE_URL="postgresql://postgres:100903@localhost:5432/instruct_DB?schema=public"
+JWT_SECRET="your-jwt-secret-key"
+NEXTAUTH_SECRET="your-secret-here"
+NEXTAUTH_URL=http://localhost:3000
+
+
+npx prisma migrate -init

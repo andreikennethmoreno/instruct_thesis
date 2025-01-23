@@ -10,16 +10,18 @@ const prisma = new PrismaClient();
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const searchQuery = url.searchParams.get('q')?.toLowerCase(); // Retrieve the 'q' query parameter
-
   const users = await prisma.user.findMany(); // Fetch all users from the database
 
+  
   // Filter users if a search query is provided
   const filteredUsers = searchQuery
     ? users.filter(
         (user) =>
           user.email.toLowerCase().includes(searchQuery) ||
-          user.username.toLowerCase().includes(searchQuery)
-      )
+          user.username.toLowerCase().includes(searchQuery) ||
+          user.role.toLocaleLowerCase().includes(searchQuery)
+
+        )
     : users;
 
   return NextResponse.json(filteredUsers);
