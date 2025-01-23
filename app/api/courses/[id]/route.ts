@@ -5,84 +5,31 @@ import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
 
-
 // GET - Fetch a specific course by ID
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-    const { id } = params;
+  const { id } = params;
   
-    // Fetch the course by ID
-    const course = await prisma.course.findUnique({
-      where: { course_id: parseInt(id) },
-      include: {
-        users: true, // Include the enrolled users
-        owners: true, // Include the course owners
-      },
-    });
-  
-    // If course is not found, return a 404 error
-    if (!course) {
-      return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+  // Fetch the course by ID
+  const course = await prisma.course.findUnique({
+    where: { course_id: parseInt(id) },
+    include: {
+      users: true,    // Optionally include enrolled users
+      owners: true,   // Optionally include course owners
     }
-  
-    // Return the course details
-    return NextResponse.json(course);
+  });
+
+  // If course is not found, return a 404 error
+  if (!course) {
+    return NextResponse.json({ error: 'Course not found' }, { status: 404 });
   }
 
+  // Return the course details
+  return NextResponse.json(course);
+}
 
 
 
 // PUT - Update a specific course by ID
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-    const session = await getServerSession(authOptions);
-  
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  
-    const { id } = params;
-    const courseId = parseInt(id);  // Parse the course ID to integer
-  
-    // Ensure both session user ID and the course owner's user ID are of the same type (both numbers)
-    const sessionUserId = parseInt(session.user.id);
-  
-    // Fetch the course by ID to check if the user is the owner
-    const course = await prisma.course.findUnique({
-      where: { course_id: courseId },
-      include: { owners: true }, // Include course owners to check ownership
-    });
-  
-    if (!course) {
-      return NextResponse.json({ error: 'Course not found' }, { status: 404 });
-    }
-  
-    // Check if the user is the owner of the course or an Admin
-    const isOwner = course.owners.some(owner => owner.user_id === sessionUserId);
-    if (session.user.role !== "Admin" && !isOwner) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-  
-    try {
-      const body: CourseData = await request.json();
-      const validatedData = courseSchema.parse(body); // Validate the incoming data using Zod schema
-  
-      // Proceed with the update
-      const updatedCourse = await prisma.course.update({
-        where: { course_id: courseId },
-        data: validatedData,
-      });
-  
-      return NextResponse.json(updatedCourse);
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return NextResponse.json({ error: error.errors }, { status: 400 });
-      }
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-  }
-  
-
-
-  // PUT - Update a specific course by ID
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
@@ -90,36 +37,60 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Extract and validate course ID
   const { id } = params;
-  const courseId = parseInt(id);  // Parse the course ID to integer
+  const courseId = parseInt(id);
 
-  // Ensure both session user ID and the course owner's user ID are of the same type (both numbers)
-  const sessionUserId = parseInt(session.user.id);
+  if (isNaN(courseId)) {
+    return NextResponse.json({ error: 'Invalid course ID' }, { status: 400 });
+  }
 
-  // Fetch the course by ID to check if the user is the owner
+  // Ensure session user ID is valid
+  const sessionUserId = parseInt(session.user.id); // Assuming session.user.id is a single value
+  if (isNaN(sessionUserId)) {
+    return NextResponse.json({ error: 'Invalid session user data' }, { status: 400 });
+  }
+
+  // Fetch the course to check ownership
   const course = await prisma.course.findUnique({
     where: { course_id: courseId },
-    include: { owners: true }, // Include course owners to check ownership
+    include: { owners: true }, // Include owners to verify ownership
   });
 
   if (!course) {
     return NextResponse.json({ error: 'Course not found' }, { status: 404 });
   }
 
-  // Check if the user is the owner of the course or an Admin
+  // Check if the user is the owner or has Admin role
   const isOwner = course.owners.some(owner => owner.user_id === sessionUserId);
-  if (session.user.role !== "Admin" && !isOwner) {
+  if (session.user.role !== 'Admin' && !isOwner) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
-    const body: CourseData = await request.json();
-    const validatedData = courseSchema.parse(body); // Validate the incoming data using Zod schema
+    const body: Partial<CourseData> = await request.json(); // Accept partial updates
+    const { owners, users, ...validatedData } = courseSchema.parse(body); // Validate input using Zod schema
+
+    // Build relational updates
+    const relationalUpdates: any = {};
+    if (owners) {
+      relationalUpdates.owners = {
+        set: owners.map((ownerId: number) => ({ user_id: ownerId })), // Replace owners
+      };
+    }
+    if (users) {
+      relationalUpdates.users = {
+        set: users.map((userId: number) => ({ user_id: userId })), // Replace users
+      };
+    }
 
     // Proceed with the update
     const updatedCourse = await prisma.course.update({
       where: { course_id: courseId },
-      data: validatedData,
+      data: {
+        ...validatedData,
+        ...relationalUpdates, // Include relational updates
+      },
     });
 
     return NextResponse.json(updatedCourse);
@@ -130,8 +101,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
-
 
 
 // DELETE - Delete a specific course by ID

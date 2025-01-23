@@ -64,10 +64,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ initialFormData, onSubmit, 
   
     return (
       <form className="card-body" onSubmit={handleFormSubmit}>
-
-       
-
-
           <div className="grid grid-cols-2 gap-4">
           <div className="form-control">
             <label className="label">

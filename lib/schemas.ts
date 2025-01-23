@@ -52,7 +52,7 @@ export const courseSchema = z.object({
   learning_outcomes: z.string().nullable().optional(), // Can be null or omitted
   created_at: z.date().optional(), // Prisma sets this automatically
   updated_at: z.date().optional(), // Prisma sets this automatically
-  owner_ids: z
+  owners: z
     .array(z.number())
     .nonempty("At least one owner is required") // Ensure there's at least one owner
     .min(1, "At least one owner is required"), // Ensures that at least one owner is provided

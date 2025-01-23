@@ -53,15 +53,16 @@ model Message {
 
 
 model Course {
-  course_id         Int          @id @default(autoincrement())
-  course_code       String       @unique
+  course_id         Int      @id @default(autoincrement())
+  course_code       String   @unique
   title             String
   description       String
   prerequisites     String?
   learning_outcomes String?
-  created_at        DateTime     @default(now())
-  updated_at        DateTime     @default(now()) @updatedAt
-  users             User[]       @relation("UserCourses") // Enrolled users
-  owners            User[]       @relation("CourseOwners") // Course owners
+  created_at        DateTime @default(now())
+  updated_at        DateTime @default(now()) @updatedAt
+  owners            User[]   @relation("CourseOwners")
+  users             User[]   @relation("UserCourses")
+  course_picture_url String? // Add this line to your model
 }
 

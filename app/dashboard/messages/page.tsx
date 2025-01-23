@@ -9,6 +9,7 @@ interface User {
   profile_picture_url: string;
   first_name: string;
   last_name: string;
+  email: string;
 }
 
 export default function Messages() {
